@@ -1,0 +1,10 @@
+player.py is for general testing
+main.py is flask app file
+
+CHANGES-
+added player images to main.py and also MADE CHANGES TO THE HTML, HTML ONLY SHOWING REG SZN STATS RN
+
+Problems-
+Some players like jalen green cant be pulled because they dont have the generic 01.html end.
+    other players like jalen brown have 02.html
+    find a way to fix this
