@@ -1,8 +1,86 @@
 import requests
 from bs4 import BeautifulSoup
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
+import mysql.connector
 
 app = Flask(__name__)
+
+# MySQL configurations
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
+    'database': 'user_system'
+}
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    player_data = None  # Initialize player_data variable
+    
+    # Check if the user is logged in and session['logged_in'] is True
+    if 'logged_in' in session and session['logged_in']:
+        logged_in = True
+        username = session.get('name')
+    else:
+        logged_in = False
+        username = None
+
+    if request.method == 'POST':
+        player_name = request.form['query']
+        player_data = scrape_player_data(player_name)
+    
+    return render_template('home.html', logged_in=logged_in, username=username, player_data=player_data)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        query = "INSERT INTO user (name, email, password) VALUES (%s, %s, %s)"
+        cursor.execute(query, (name, email, password))
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+        return redirect(url_for('login'))
+
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        query = "SELECT * FROM user WHERE email = %s AND password = %s"
+        cursor.execute(query, (email, password))
+        user = cursor.fetchone()
+
+        cursor.close()
+        connection.close()
+
+        if user:
+            session['logged_in'] = True
+            session['name'] = user[1]  # Name is at index 1 in the tuple
+            return redirect(url_for('home'))
+        else:
+            return 'Invalid email/password combination'
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()  # Clear all session data
+    return redirect(url_for('home'))
 
 def scrape_player_data(player_name):
     base_url = 'https://www.basketball-reference.com/players/'
@@ -28,6 +106,7 @@ def scrape_player_data(player_name):
     # height = soup.select_one('#meta > div > p:nth-child(5) > span').text
     height_weight_element = soup.select_one('#meta > div > p:contains("lb")')
     height_weight = height_weight_element.text if height_weight_element else None
+
 
 #Career per game
     per_game_table = soup.find('table', id='per_game')
@@ -106,17 +185,6 @@ print('Player Image', player_data['image_url'])
 print('Regular season Career Averages:', player_data['per_game_stats'])
 print('Career Totals:', player_data['totals_stats'])
 print('Playoffs Career Averages:', player_data['playoffs_per_game_stats'])
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    player_data = None  # Initialize player_data variable
-    
-    if request.method == 'POST':
-        player_name = request.form['query']
-        player_data = scrape_player_data(player_name)
-    
-    # Pass the player_data variable to the template
-    return render_template('index.html', player_data=player_data)
 
 
 if __name__ == '__main__':

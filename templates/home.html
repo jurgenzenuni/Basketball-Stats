@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Numeri</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('../imgs/dark-sea-waves-4k-0e.jpg');
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #000000c5;
+            color: #fff;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+            /* height: 80px; */
+        }
+
+        .navbar h1 {
+            margin: 0;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1800px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+            background-color: rgba(0, 0, 0, 0.123); 
+        }
+
+        p {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .nav-link {
+            /* background-color: black; */
+            text-decoration: none !important;
+            border-radius: 5px;
+        }
+        .nav-link:hover {
+            background-color: rgb(15, 15, 15);
+            text-decoration: none;
+            transition: 0.3s ease-in;
+        }
+        .nav-item p {
+            margin-right: 13px;
+        }
+                /* Add custom styles for tables */
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+            border: 1px solid #000000; 
+            border-radius: 10px;
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #fff; /* Set cell border color */
+            text-align: center;
+        }
+
+        th {
+            background-color: #472ea3; /* Set table header background color */
+            color: white;
+            position: relative;
+            cursor: pointer;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: rgb(255, 255, 255); /* Set even row background color */
+        }
+
+        tbody tr:hover {
+            background-color: rgb(167, 167, 167); /* Set row hover background color */
+        }
+
+        #player-image {
+            max-width: 200px;
+            border-radius: 5px;
+        }
+        .tableheaders {
+          display: flex;
+          justify-content: center;
+          font-size: 30px;
+          font-style: bold;
+        }
+        th:hover::after {
+            content: " ▲";
+            position: absolute;
+            right: 5px;
+            bottom: 10px;
+            font-size: 0.8em;
+        }
+
+        th.sorted-asc::after {
+            content: " ▲";
+            position: absolute;
+            right: 5px;
+            bottom: 10px;
+            font-size: 0.8em;
+        }
+
+        th.sorted-desc::after {
+            content: " ▼";
+            position: absolute;
+            right: 5px;
+            bottom: 10px;
+            font-size: 0.8em;
+        }
+        .topc {
+            display: flex;
+            justify-content: center;
+        }
+        .rounded-input {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+        border-radius: 20px; /* Adjust the border-radius value as needed */
+        padding: 10px; /* Add padding to the input for better appearance */
+        border: 1px solid #ccc; /* Add a border to the input for better visibility */
+        width: 400px;
+    }
+    .srch {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+        border-radius: 20px; /* Adjust the border-radius value as needed */
+        padding: 10px; /* Add padding to the input for better appearance */
+        border: none;
+    }
+    .srch:hover {
+        background-color: #000000;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+        transition: 0.3s;
+        color: white;
+    }
+    h2 {
+        margin-top: 10px;
+    }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <h1 class="navbar-brand">NBA Stats (updated daily) </h1>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="">Home</a>
+                </li>
+                {% if session.logged_in %}
+                    <!-- <li class="nav-item">
+                        <p>Hello, {{ session.name }}</p>
+                    </li> -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+<div class="container">
+    <div class="topc">
+        <h2>Search NBA Players</h2> 
+    </div>
+    <div class="topc">
+        <form action="/" method="POST">
+            <input type="text" name="query" class="rounded-input" placeholder="Enter Full player name">
+            <button class="srch" type="submit">Submit</button>
+        </form>
+    </div>
+    
+    {% if player_data %}
+        <h2>{{ player_data.name }}</h2>
+        <img id="player-image" src="{{ player_data['image_url'] }}" alt="Player Image">
+        <h2>{{ player_data.position }}</h2>
+        <h2>Height & Weight: {{ player_data.height_weight }}</h2>
+        <!-- <h2 class="Reg_szn">Regular Season Career Averages: {{player_data.per_game_stats}}</h2> -->
+        <div style="overflow-x: auto;">
+        <table> 
+            <thead> 
+              <h2 class="tableheaders">Regular Season Career Averages</h2>
+              <tr>
+                <!-- <th>Season</th> -->
+                <th onclick="sortTable(0)">Age</th>
+                <th onclick="sortTable(1)">Tm</th>
+                <th onclick="sortTable(2)">Lg</th>
+                <th onclick="sortTable(3)">Pos</th>
+                <th onclick="sortTable(4)">G</th>
+                <th onclick="sortTable(5)">MP</th>
+                <th onclick="sortTable(6)">FG</th>
+                <th onclick="sortTable(7)">FGA</th>
+                <th onclick="sortTable(8)">FG%</th>
+                <th onclick="sortTable(9)">3P</th>
+                <th onclick="sortTable(10)">3PA</th>
+                <th onclick="sortTable(11)">3P%</th>
+                <!-- <th>2P</th>
+                <th>2PA</th>
+                <th>2P%</th>
+                <th>eFG%</th> -->
+                <th onclick="sortTable(12)">FT</th>
+                <th onclick="sortTable(13)">FTA</th>
+                <th onclick="sortTable(14)">FT%</th>    
+                <th onclick="sortTable(15)">ORB</th>
+                <th onclick="sortTable(16)">DRB</th>
+                <th onclick="sortTable(17)">TRB</th>
+                <th onclick="sortTable(18)">AST</th>
+                <th onclick="sortTable(19)">STL</th>
+                <th onclick="sortTable(20)">BLK</th>
+                <th onclick="sortTable(21)">TOV</th>
+                <th onclick="sortTable(22)">PF</th>
+                <th onclick="sortTable(23)">PTS</th>
+                <!-- <th> Awards </th> -->
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in player_data.per_game_stats %}
+                <tr>
+                    <td>{{ row['Age'] }}</td>
+                    <td>{{ row['Tm'] }}</td>
+                    <td>{{ row['Lg'] }}</td>
+                    <td>{{ row['Pos'] }}</td>
+                    <td>{{ row['G'] }}</td>
+                    <td>{{ row['MP'] }}</td>
+                    <td>{{ row['FG'] }}</td>
+                    <td>{{ row['FGA'] }}</td>
+                    <td>{{ row['FG%'] }}</td>
+                    <td>{{ row['3P'] }}</td>
+                    <td>{{ row['3PA'] }}</td>
+                    <td>{{ row['3P%'] }}</td>
+                    <!-- <td>{{ row['2P'] }}</td>
+                    <td>{{ row['2PA'] }}</td>
+                    <td>{{ row['2P%'] }}</td>
+                    <td>{{ row['eFG%'] }}</td> -->
+                    <td>{{ row['FT'] }}</td>
+                    <td>{{ row['FTA'] }}</td>
+                    <td>{{ row['FT%'] }}</td>
+                    <td>{{ row['ORB'] }}</td>
+                    <td>{{ row['DRB'] }}</td>
+                    <td>{{ row['TRB'] }}</td>
+                    <td>{{ row['AST'] }}</td>
+                    <td>{{ row['STL'] }}</td>
+                    <td>{{ row['BLK'] }}</td>
+                    <td>{{ row['TOV'] }}</td>
+                    <td>{{ row['PF'] }}</td>
+                    <td>{{ row['PTS'] }}</td>
+                </tr>
+              {% endfor %}
+              
+            </tbody>
+          </table>
+        </div>
+        <div style="overflow-x: auto;">
+        <table>
+            <thead> 
+              <h2 class="tableheaders">Career Totals</h2>
+                <tr>
+                    <th>Age</th>
+                    <th>Tm</th>
+                    <th>Lg</th>
+                    <th>Pos</th>
+                    <th>G</th>
+                    <th>MP</th>
+                    <th>FG</th>
+                    <th>FGA</th>
+                    <th>FG%</th>
+                    <th>3P</th>
+                    <th>3PA</th>
+                    <th>3P%</th>
+                    <!-- <th>2P</th>
+                    <th>2PA</th>
+                    <th>2P%</th>
+                    <th>eFG%</th> -->
+                    <th>FT</th>
+                    <th>FTA</th>
+                    <th>FT%</th>    
+                    <th>ORB</th>
+                    <th>DRB</th>
+                    <th>TRB</th>
+                    <th>AST</th>
+                    <th>STL</th>
+                    <th>BLK</th>
+                    <th>TOV</th>
+                    <th>PF</th>
+                    <th>PTS</th>
+                  </tr>
+            </thead>
+            <tbody>
+                {% for row in player_data.totals_stats %}
+                  <tr>
+                      <td>{{ row['Age'] }}</td>
+                      <td>{{ row['Tm'] }}</td>
+                      <td>{{ row['Lg'] }}</td>
+                      <td>{{ row['Pos'] }}</td>
+                      <td>{{ row['G'] }}</td>
+                      <td>{{ row['MP'] }}</td>
+                      <td>{{ row['FG'] }}</td>
+                      <td>{{ row['FGA'] }}</td>
+                      <td>{{ row['FG%'] }}</td>
+                      <td>{{ row['3P'] }}</td>
+                      <td>{{ row['3PA'] }}</td>
+                      <td>{{ row['3P%'] }}</td>
+                      <!-- <td>{{ row['2P'] }}</td>
+                      <td>{{ row['2PA'] }}</td>
+                      <td>{{ row['2P%'] }}</td>
+                      <td>{{ row['eFG%'] }}</td> -->
+                      <td>{{ row['FT'] }}</td>
+                      <td>{{ row['FTA'] }}</td>
+                      <td>{{ row['FT%'] }}</td>
+                      <td>{{ row['ORB'] }}</td>
+                      <td>{{ row['DRB'] }}</td>
+                      <td>{{ row['TRB'] }}</td>
+                      <td>{{ row['AST'] }}</td>
+                      <td>{{ row['STL'] }}</td>
+                      <td>{{ row['BLK'] }}</td>
+                      <td>{{ row['TOV'] }}</td>
+                      <td>{{ row['PF'] }}</td>
+                      <td>{{ row['PTS'] }}</td>
+                  </tr>
+                {% endfor %}
+                
+              </tbody>
+        </table>
+        </div>
+        <div style="overflow-x: auto;">
+        <table>
+            <thead> 
+              <h2 class="tableheaders">Playoff Career Averages</h2>
+                <tr>
+                    <th>Age</th>
+                    <th>Tm</th>
+                    <th>Lg</th>
+                    <th>Pos</th>
+                    <th>G</th>
+                    <th>MP</th>
+                    <th>FG</th>
+                    <th>FGA</th>
+                    <th>FG%</th>
+                    <th>3P</th>
+                    <th>3PA</th>
+                    <th>3P%</th>
+                    <!-- <th>2P</th>
+                    <th>2PA</th>
+                    <th>2P%</th>
+                    <th>eFG%</th> -->
+                    <th>FT</th>
+                    <th>FTA</th>
+                    <th>FT%</th>    
+                    <th>ORB</th>
+                    <th>DRB</th>
+                    <th>TRB</th>
+                    <th>AST</th>
+                    <th>STL</th>
+                    <th>BLK</th>
+                    <th>TOV</th>
+                    <th>PF</th>
+                    <th>PTS</th>
+                  </tr>
+            </thead>
+            <tbody>
+                {% for row in player_data.playoffs_per_game_stats %}
+                  <tr>
+                      <td>{{ row['Age'] }}</td>
+                      <td>{{ row['Tm'] }}</td>
+                      <td>{{ row['Lg'] }}</td>
+                      <td>{{ row['Pos'] }}</td>
+                      <td>{{ row['G'] }}</td>
+                      <td>{{ row['MP'] }}</td>
+                      <td>{{ row['FG'] }}</td>
+                      <td>{{ row['FGA'] }}</td>
+                      <td>{{ row['FG%'] }}</td>
+                      <td>{{ row['3P'] }}</td>
+                      <td>{{ row['3PA'] }}</td>
+                      <td>{{ row['3P%'] }}</td>
+                      <!-- <td>{{ row['2P'] }}</td>
+                      <td>{{ row['2PA'] }}</td>
+                      <td>{{ row['2P%'] }}</td>
+                      <td>{{ row['eFG%'] }}</td> -->
+                      <td>{{ row['FT'] }}</td>
+                      <td>{{ row['FTA'] }}</td>
+                      <td>{{ row['FT%'] }}</td>
+                      <td>{{ row['ORB'] }}</td>
+                      <td>{{ row['DRB'] }}</td>
+                      <td>{{ row['TRB'] }}</td>
+                      <td>{{ row['AST'] }}</td>
+                      <td>{{ row['STL'] }}</td>
+                      <td>{{ row['BLK'] }}</td>
+                      <td>{{ row['TOV'] }}</td>
+                      <td>{{ row['PF'] }}</td>
+                      <td>{{ row['PTS'] }}</td>
+                  </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    {% endif %}
+  </div>
+
+  <script>
+    // JavaScript code for sorting table columns
+    function sortTable(n) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementsByTagName("table")[0];
+        switching = true;
+        // Set the sorting direction to ascending:
+        dir = "asc";
+        /* Make a loop that will continue until
+        no switching has been done: */
+        while (switching) {
+            // Start by saying: no switching is done:
+            switching = false;
+            rows = table.rows;
+            /* Loop through all table rows (except the
+            first, which contains table headers): */
+            for (i = 1; i < (rows.length - 1); i++) {
+                // Start by saying there should be no switching:
+                shouldSwitch = false;
+                /* Get the two elements you want to compare,
+                one from current row and one from the next: */
+                x = rows[i].getElementsByTagName("td")[n];
+                y = rows[i + 1].getElementsByTagName("td")[n];
+                /* Check if the two rows should switch place,
+                based on the direction, asc or desc: */
+                if (dir == "asc") {
+                    if (parseFloat(x.innerHTML) < parseFloat(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir == "desc") {
+                    if (parseFloat(x.innerHTML) > parseFloat(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                /* If a switch has been marked, make the switch
+                and mark that a switch has been done: */
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                // Each time a switch is done, increase this count by 1:
+                switchcount++;
+            } else {
+                /* If no switching has been done AND the direction is "asc",
+                set the direction to "desc" and run the while loop again. */
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+
+        // Remove existing sorting classes from all th elements
+        var thArray = document.getElementsByTagName("th");
+        for (var j = 0; j < thArray.length; j++) {
+            thArray[j].classList.remove("sorted-asc");
+            thArray[j].classList.remove("sorted-desc");
+        }
+
+        // Add sorting class to the clicked th element
+        var clickedTh = table.getElementsByTagName("th")[n];
+        if (dir == "asc") {
+            clickedTh.classList.add("sorted-asc");
+        } else {
+            clickedTh.classList.add("sorted-desc");
+        }
+    }
+</script>
+
+
+
+</body>
+</html>
+
